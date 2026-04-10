@@ -49,8 +49,11 @@
 - 前后端不分离架构，MVT 模式完整实践
 
 ## 📸 部分界面截图
-（此处可粘贴项目运行截图，若有）
+<img width="1812" height="642" alt="image" src="https://github.com/user-attachments/assets/6c5c2092-d231-43c4-8c0d-b0a4932b12c2" />
+<img width="1511" height="568" alt="image" src="https://github.com/user-attachments/assets/27022a22-6809-4aa1-8182-db6549d8a733" />
+<img width="2454" height="774" alt="image" src="https://github.com/user-attachments/assets/11f341b3-d775-48b1-9b41-06fcc85cdc99" />
+
 
 ## 👤 作者
 1tangzihan  
-联系方式：（可选填邮箱）
+联系方式：1529605067@qq.com
