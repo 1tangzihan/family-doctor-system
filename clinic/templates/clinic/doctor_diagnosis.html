@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>填写诊断</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        }
+        h3 {
+            margin-top: 0;
+        }
+        .info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            min-height: 150px;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #229954;
+        }
+        .messages {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h3>📝 填写诊断</h3>
+        
+        <div class="info">
+            <strong>患者：</strong>{{ appointment.patient.user.get_full_name }}<br>
+            <strong>预约时间：</strong>{{ appointment.get_local_time|date:"Y-m-d H:i" }}<br>
+            <strong>当前状态：</strong>{{ appointment.get_status_display }}
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="diagnosis"><strong>诊断结果：</strong></label>
+            <textarea name="diagnosis" id="diagnosis" placeholder="请输入诊断意见、处方等...">{{ appointment.diagnosis|default:'' }}</textarea>
+            <button type="submit">提交诊断并标记为已完成</button>
+        </form>
+        
+        <p style="margin-top: 20px;">
+            <a href="{% url 'doctor_appointment_list' %}">← 返回预约列表</a>
+        </p>
+    </div>
+</body>
+</html>
