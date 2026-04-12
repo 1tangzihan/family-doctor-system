@@ -1,0 +1,457 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 家庭医生系统</title>
+    <link rel="stylesheet" href="{% static 'clinic/css/base.css' %}">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+        }
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .avatar-section {
+            position: relative;
+            text-align: center;
+        }
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .avatar-placeholder {
+            font-size: 48px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .avatar-actions {
+            margin-top: 12px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn-primary {
+            background: linear-gradient(145deg, #3498db, #4aa3df);
+            color: white;
+            box-shadow: 0 6px 14px rgba(52,152,219,0.25);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(145deg, #2980b9, #3498db);
+            transform: scale(1.02);
+            box-shadow: 0 8px 18px rgba(52,152,219,0.35);
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 10px 20px;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .info-item {
+            margin-bottom: 12px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+            margin-right: 12px;
+        }
+        .info-value {
+            color: #1e293b;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 16px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-body {
+            text-align: center;
+        }
+        .modal-body img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+        }
+        .upload-form {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52,152,219,0.15);
+        }
+        .upload-preview {
+            margin-top: 16px;
+            text-align: center;
+        }
+        .upload-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        .status-message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .status-success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .status-info {
+            background-color: #e0f2fe;
+            color: #075985;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ========== 导航栏 ========== -->
+        <div class="navbar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span>👤 欢迎，<strong>{{ user.last_name }}{{ user.first_name|default:user.username }}</strong>！</span>
+                <a href="{% url 'home' %}">🏥 医生列表</a>
+                {% if is_doctor %}
+                    <a href="{% url 'doctor_appointment_list' %}">👨‍⚕️ 医生后台</a>
+                {% else %}
+                    <a href="{% url 'patient_appointment_list' %}">📋 我的预约</a>
+                {% endif %}
+                <a href="{% url 'user_profile' %}">👤 个人中心</a>
+                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">🚪 退出</button>
+                </form>
+            </div>
+        </div>
+        
+        <h1 class="page-title">👤 个人中心</h1>
+        
+        <div class="card">
+            <div class="profile-header">
+                <div class="avatar-section">
+                    <div class="profile-avatar" id="profile-avatar">
+                        {% if user_avatar %}
+                            <img src="{{ user_avatar }}" alt="{{ user.last_name }}头像" id="avatar-image">
+                        {% else %}
+                            <div class="avatar-placeholder">{{ user.last_name|first }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="avatar-actions">
+                        <button class="btn btn-primary" id="change-avatar-btn">更换头像</button>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="info-item">
+                        <span class="info-label">姓名：</span>
+                        <span class="info-value">{{ user.last_name }}{{ user.first_name|default:user.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">用户名：</span>
+                        <span class="info-value">{{ user.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">用户类型：</span>
+                        <span class="info-value">{% if is_doctor %}医生{% else %}患者{% endif %}</span>
+                    </div>
+                    {% if is_doctor %}
+                        <div class="info-item">
+                            <span class="info-label">专业：</span>
+                            <span class="info-value">{{ doctor.specialty }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary" style="margin-right: 12px;">退出登录</button>
+                </form>
+                <a href="{% if is_doctor %}{% url 'doctor_appointment_list' %}{% else %}{% url 'patient_appointment_list' %}{% endif %}" class="btn btn-primary">返回预约列表</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 头像查看模态框 -->
+    <div id="avatar-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="modal-avatar" src="" alt="头像大图">
+            </div>
+        </div>
+    </div>
+    
+    <!-- 头像上传模态框 -->
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 style="text-align: center; margin-bottom: 20px;">更换头像</h3>
+            <div class="upload-form">
+                <div class="form-group">
+                    <label for="avatar-file">选择图片（JPG、PNG格式，不超过2MB）</label>
+                    <input type="file" id="avatar-file" accept="image/jpeg,image/png">
+                </div>
+                <div class="upload-preview" id="upload-preview">
+                    <!-- 预览图片将在这里显示 -->
+                </div>
+                <div class="status-message" id="upload-status" style="display: none;"></div>
+                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                    <button class="btn btn-primary" id="confirm-upload">确认上传</button>
+                    <button class="btn btn-secondary" id="cancel-upload">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 头像查看功能
+            const profileAvatar = document.getElementById('profile-avatar');
+            const avatarModal = document.getElementById('avatar-modal');
+            const modalAvatar = document.getElementById('modal-avatar');
+            const closeButtons = document.getElementsByClassName('close');
+            
+            profileAvatar.addEventListener('click', function() {
+                const avatarImage = document.getElementById('avatar-image');
+                if (avatarImage) {
+                    // 确保使用正确的头像URL
+                    const avatarUrl = avatarImage.src;
+                    // 直接使用当前头像URL
+                    modalAvatar.src = avatarUrl;
+                    avatarModal.style.display = 'block';
+                }
+            });
+            
+            // 关闭模态框
+            for (let i = 0; i < closeButtons.length; i++) {
+                closeButtons[i].addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    modal.style.display = 'none';
+                });
+            }
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+            
+            // 头像上传功能
+            const changeAvatarBtn = document.getElementById('change-avatar-btn');
+            const uploadModal = document.getElementById('upload-modal');
+            const avatarFile = document.getElementById('avatar-file');
+            const uploadPreview = document.getElementById('upload-preview');
+            const confirmUpload = document.getElementById('confirm-upload');
+            const cancelUpload = document.getElementById('cancel-upload');
+            const uploadStatus = document.getElementById('upload-status');
+            
+            changeAvatarBtn.addEventListener('click', function() {
+                uploadModal.style.display = 'block';
+            });
+            
+            // 文件选择预览
+            avatarFile.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // 检查文件大小
+                    if (file.size > 2 * 1024 * 1024) {
+                        showStatus('文件大小不能超过2MB', 'error');
+                        return;
+                    }
+                    
+                    // 检查文件类型
+                    const allowedTypes = ['image/jpeg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        showStatus('只支持JPG和PNG格式', 'error');
+                        return;
+                    }
+                    
+                    // 预览图片
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadPreview.innerHTML = '<img src="' + e.target.result + '" alt="预览">';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 确认上传
+            confirmUpload.addEventListener('click', function() {
+                const file = avatarFile.files[0];
+                if (file) {
+                    showStatus('上传中...', 'info');
+                    
+                    // 创建FormData对象
+                    const formData = new FormData();
+                    formData.append('avatar', file);
+                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                    
+                    // 发送上传请求
+                    fetch('{% url 'upload_avatar' %}', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showStatus('上传成功！', 'success');
+                            
+                            // 更新头像
+                            const avatarImage = document.getElementById('avatar-image');
+                            if (avatarImage) {
+                                avatarImage.src = data.avatar_url + '?t=' + new Date().getTime();
+                            } else {
+                                document.getElementById('profile-avatar').innerHTML = '<img src="' + data.avatar_url + '?t=' + new Date().getTime() + '" alt="{{ user.last_name }}头像" id="avatar-image">';
+                            }
+                            
+                            // 3秒后关闭模态框
+                            setTimeout(() => {
+                                uploadModal.style.display = 'none';
+                                resetUploadForm();
+                            }, 1500);
+                        } else {
+                            showStatus('上传失败：' + data.error, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showStatus('上传失败：网络错误', 'error');
+                    });
+                }
+            });
+            
+            // 取消上传
+            cancelUpload.addEventListener('click', function() {
+                uploadModal.style.display = 'none';
+                resetUploadForm();
+            });
+            
+            // 显示状态信息
+            function showStatus(message, type) {
+                uploadStatus.textContent = message;
+                uploadStatus.style.display = 'block';
+                uploadStatus.className = 'status-message';
+                
+                if (type === 'success') {
+                    uploadStatus.classList.add('status-success');
+                } else if (type === 'error') {
+                    uploadStatus.classList.add('status-error');
+                } else {
+                    uploadStatus.classList.add('status-info');
+                }
+            }
+            
+            // 重置上传表单
+            function resetUploadForm() {
+                avatarFile.value = '';
+                uploadPreview.innerHTML = '';
+                uploadStatus.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

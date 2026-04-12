@@ -1,87 +1,259 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>填写诊断</title>
+    <title>填写诊断 - 家庭医生系统</title>
+    <link rel="stylesheet" href="{% static 'clinic/css/base.css' %}">
     <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            max-width: 600px;
-            margin: 40px auto;
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f5f7fa;
         }
         .card {
             background: white;
-            border-radius: 16px;
+            border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255,255,255,0.7);
         }
-        h3 {
-            margin-top: 0;
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 30px;
+            text-align: center;
         }
-        .info {
-            background-color: #ecf0f1;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .info-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
         }
-        textarea {
+        .info-item {
+            margin-bottom: 12px;
+        }
+        .info-label {
+            display: inline-block;
+            width: 100px;
+            font-weight: 600;
+            color: #334155;
+        }
+        .info-value {
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .form-group textarea {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            min-height: 150px;
+            padding: 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            min-height: 200px;
+            resize: vertical;
+            transition: all 0.2s ease;
         }
-        button {
-            background-color: #27ae60;
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52,152,219,0.15);
+        }
+        .btn-submit {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 14px rgba(39,174,96,0.25);
+        }
+        .btn-submit:hover {
+            background: linear-gradient(145deg, #229954, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(39,174,96,0.35);
+        }
+        .btn-ai {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 40px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
+            margin-right: 15px;
+            box-shadow: 0 6px 14px rgba(155, 89, 182, 0.25);
+            transition: all 0.2s ease;
         }
-        button:hover {
-            background-color: #229954;
+        .btn-ai:hover {
+            background: linear-gradient(145deg, #8e44ad, #9b59b6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(155, 89, 182, 0.35);
         }
         .messages {
-            margin-bottom: 15px;
+            margin-bottom: 24px;
+        }
+        .messages .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .messages .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .ai-loading {
+            color: #8e44ad;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h3>📝 填写诊断</h3>
-        
-        <div class="info">
-            <strong>患者：</strong>{{ appointment.patient.user.get_full_name }}<br>
-            <strong>预约时间：</strong>{{ appointment.get_local_time|date:"Y-m-d H:i" }}<br>
-            <strong>当前状态：</strong>{{ appointment.get_status_display }}
-        </div>
+    <div class="container">
+        <div class="card">
+            <h1 class="page-title">📝 填写诊断</h1>
+            
+            <div class="info-card">
+                <div class="info-item">
+                    <span class="info-label">患者：</span>
+                    <span class="info-value">
+                        {% with patient_user=appointment.patient.user %}
+                            {{ patient_user.last_name }}{{ patient_user.first_name|default:patient_user.username }}
+                        {% endwith %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">预约时间：</span>
+                    <span class="info-value">{{ appointment.get_local_time|date:"Y-m-d H:i" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">当前状态：</span>
+                    <span class="info-value">{{ appointment.get_status_display }}</span>
+                </div>
+            </div>
 
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-        <form method="post">
-            {% csrf_token %}
-            <label for="diagnosis"><strong>诊断结果：</strong></label>
-            <textarea name="diagnosis" id="diagnosis" placeholder="请输入诊断意见、处方等...">{{ appointment.diagnosis|default:'' }}</textarea>
-            <button type="submit">提交诊断并标记为已完成</button>
-        </form>
-        
-        <p style="margin-top: 20px;">
-            <a href="{% url 'doctor_appointment_list' %}">← 返回预约列表</a>
-        </p>
+<!-- 当前症状输入框 -->
+<div style="margin-bottom: 20px;">
+    <label for="symptoms" style="display: block; margin-bottom: 8px; font-weight: 500; color: #334155;">
+        📋 当前症状 / 主诉 
+    </label>
+    <input type="text" id="symptoms" name="symptoms" placeholder="例如：发热、咳嗽三天，伴有咽痛..." 
+           style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 16px; font-size: 1rem;">
+</div>
+
+            <!-- AI 按钮区域 -->
+            <div style="margin-bottom: 20px; display: flex; align-items: center;">
+                <button type="button" id="ai-assist-btn" class="btn-ai">✨ AI 辅助分析</button>
+                <span id="ai-loading" class="ai-loading" style="display: none;">🤖 AI 正在分析中...</span>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="diagnosis">诊断结果：</label>
+                    <textarea name="diagnosis" id="diagnosis" placeholder="请输入诊断意见、处方等...">{{ appointment.diagnosis|default:'' }}</textarea>
+                </div>
+                <button type="submit" class="btn-submit">✅ 提交诊断并标记为已完成</button>
+            </form>
+
+            <!-- AI 消息区域 -->
+            <div id="ai-message" style="margin-top: 20px; display: none;"></div>
+            
+            <a href="{% url 'doctor_appointment_list' %}" class="back-link">← 返回预约列表</a>
+        </div>
     </div>
+
+    <!-- AI 交互脚本 -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const aiBtn = document.getElementById('ai-assist-btn');
+        const diagnosisTextarea = document.getElementById('diagnosis');
+        const aiLoading = document.getElementById('ai-loading');
+        const aiMessage = document.getElementById('ai-message');
+
+        aiBtn.addEventListener('click', function() {
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            const appointmentId = pathParts[pathParts.length - 1];
+
+            aiBtn.disabled = true;
+            aiLoading.style.display = 'inline';
+            aiMessage.style.display = 'none';
+
+            fetch(`/doctor/ai-assist/${appointmentId}/`, {
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        symptoms: document.getElementById('symptoms').value.trim()
+    })
+})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const currentContent = diagnosisTextarea.value;
+                    const newContent = currentContent 
+                        ? currentContent + '\n\n========== AI 辅助建议 ==========\n' + data.content
+                        : data.content;
+                    diagnosisTextarea.value = newContent;
+                    aiMessage.style.display = 'block';
+                    aiMessage.innerHTML = '<div style="background: #e8daef; color: #6c3483; padding: 12px 16px; border-radius: 12px;">✅ AI 建议已添加到诊断框</div>';
+                } else {
+                    aiMessage.style.display = 'block';
+                    aiMessage.innerHTML = '<div style="background: #fadbd8; color: #c0392b; padding: 12px 16px; border-radius: 12px;">❌ ' + (data.error || '请求失败，请稍后重试') + '</div>';
+                }
+            })
+            .catch(error => {
+                aiMessage.style.display = 'block';
+                aiMessage.innerHTML = '<div style="background: #fadbd8; color: #c0392b; padding: 12px 16px; border-radius: 12px;">❌ 网络错误，请检查控制台</div>';
+            })
+            .finally(() => {
+                aiBtn.disabled = false;
+                aiLoading.style.display = 'none';
+            });
+        });
+    });
+    </script>
 </body>
 </html>

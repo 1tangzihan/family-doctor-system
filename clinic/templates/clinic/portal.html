@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭医生系统 - 选择登录</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 450px;
+            width: 90%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            padding: 18px 30px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-patient {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-patient:hover {
+            background-color: #2980b9;
+            transform: scale(1.02);
+        }
+        .btn-doctor {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-doctor:hover {
+            background-color: #229954;
+            transform: scale(1.02);
+        }
+        .register-link {
+            margin-top: 15px;
+        }
+        .register-link a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .admin-link {
+            margin-top: 20px;
+        }
+        .admin-link a {
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .admin-link a:hover {
+            color: #7f8c8d;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 家庭医生系统</h1>
+        <div class="btn-group">
+            <a href="{% url 'login' %}?role=patient" class="btn btn-patient">🧑 患者登录</a>
+            <a href="{% url 'login' %}?role=doctor" class="btn btn-doctor">👨‍⚕️ 医生登录</a>
+        </div>
+        <div class="register-link">
+            <a href="{% url 'patient_register' %}">📝 还没有账号？立即注册</a>
+        </div>
+        <div class="admin-link">
+            <a href="/admin/login/">管理员登录</a>
+        </div>
+    </div>
+</body>
+</html>

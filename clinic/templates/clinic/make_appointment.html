@@ -1,93 +1,184 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的预约 - 医生端</title>
+    <title>预约 - {{ doctor.user.get_full_name }}</title>
+    <link rel="stylesheet" href="{% static 'clinic/css/base.css' %}">
     <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            max-width: 900px;
-            margin: 30px auto;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f5f7fa;
         }
-        h2 {
-            color: #2c3e50;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .card {
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255,255,255,0.7);
         }
-        th {
-            background-color: #3498db;
-            color: white;
-            padding: 12px;
-            text-align: left;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        .status-pending { color: #e67e22; font-weight: bold; }
-        .status-confirmed { color: #27ae60; font-weight: bold; }
-        .status-completed { color: #7f8c8d; }
-        .btn {
-            display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        .empty {
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 30px;
             text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
+        }
+        .doctor-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        .doctor-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        .doctor-specialty {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        .doctor-intro {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52,152,219,0.15);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 14px rgba(39,174,96,0.25);
+        }
+        .btn-submit:hover {
+            background: linear-gradient(145deg, #229954, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(39,174,96,0.35);
+        }
+        .errorlist {
+            color: #e74c3c;
+            list-style: none;
+            padding: 8px 12px;
+            margin: 8px 0 0;
+            background: #fee2e2;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .messages {
+            margin-bottom: 24px;
+        }
+        .messages .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .messages .info {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .messages .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h2>👨‍⚕️ 我的预约列表 - {{ doctor.user.get_full_name }}</h2>
-    <p><a href="{% url 'doctor_list' %}">← 返回首页</a></p>
+    <div class="container">
+        <div class="card">
+            <h1 class="page-title">📋 预约挂号</h1>
+            
+            <div class="doctor-card">
+                <div class="doctor-name">👨‍⚕️ {{ doctor.user.last_name }}{{ doctor.user.first_name|default:doctor.user.username }}</div>
+                <div class="doctor-specialty">🏥 {{ doctor.specialty }}</div>
+                <div class="doctor-intro">📝 {{ doctor.introduction|truncatewords:15 }}</div>
+            </div>
 
-    {% if appointments %}
-        <table>
-            <thead>
-                <tr>
-                    <th>患者姓名</th>
-                    <th>预约时间</th>
-                    <th>状态</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for appt in appointments %}
-                <tr>
-                    <td>{{ appt.patient.user.get_full_name }}</td>
-                    <td>{{ appt.get_local_time|date:"Y-m-d H:i" }}</td>
-                    <td class="status-{{ appt.status }}">{{ appt.get_status_display }}</td>
-                    <td>
-                        {% if appt.status != 'completed' and appt.status != 'cancelled' %}
-                            <a href="{% url 'doctor_diagnosis' appt.id %}" class="btn">填写诊断</a>
-                        {% else %}
-                            <span style="color: #7f8c8d;">{{ appt.get_status_display }}</span>
-                        {% endif %}
-                    </td>
-                </tr>
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="empty">暂无预约记录。</div>
-    {% endif %}
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.appointment_time.id_for_label }}">⏰ 选择预约时间：</label>
+                    {{ form.appointment_time }}
+                    {% if form.appointment_time.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.appointment_time.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn-submit">✅ 确认预约</button>
+            </form>
+            
+            <a href="{% url 'home' %}" class="back-link">← 返回医生列表</a>
+        </div>
+    </div>
 </body>
 </html>

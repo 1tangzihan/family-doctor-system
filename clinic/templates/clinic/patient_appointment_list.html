@@ -1,74 +1,246 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的预约 - 患者端</title>
+    <link rel="stylesheet" href="{% static 'clinic/css/base.css' %}">
     <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            max-width: 900px;
-            margin: 30px auto;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f5f7fa;
         }
-        h2 { color: #2c3e50; }
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            overflow: hidden;
+            margin: 0;
         }
         th {
-            background-color: #3498db;
-            color: white;
-            padding: 12px;
+            background: #f8fafc;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 16px;
             text-align: left;
+            border-bottom: 2px solid #e2e8f0;
         }
         td {
-            padding: 12px;
-            border-bottom: 1px solid #ecf0f1;
+            padding: 14px 16px;
+            border-bottom: 1px solid #ecf1f7;
         }
-        .status-pending { color: #e67e22; font-weight: bold; }
-        .status-confirmed { color: #27ae60; font-weight: bold; }
-        .status-completed { color: #7f8c8d; }
-        .status-cancelled { color: #e74c3c; }
-        .empty {
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background-color: #fafcff;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        .status-confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-completed {
+            background: #e0f2fe;
+            color: #075985;
+        }
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
             text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
         }
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 8px 16px;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8fafc;
+            border-radius: 24px;
+            margin-top: 20px;
+        }
+        .empty-state h3 {
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+.urgent-row {
+    background-color: #fee2e2 !important;
+    border-left: 4px solid #dc2626;
+}
+.urgent-row:hover td {
+    background-color: #fecaca !important;
+}
     </style>
 </head>
 <body>
-    <h2>📋 我的预约记录 - {{ patient.user.get_full_name }}</h2>
-    <p><a href="{% url 'doctor_list' %}">← 返回首页继续预约</a></p>
+    <div class="container">
+        <!-- ========== 导航栏 ========== -->
+        <div class="navbar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span>👤 欢迎，<strong>{{ patient.user.last_name }}{{ patient.user.first_name|default:patient.user.username }}</strong>！</span>
+                <a href="{% url 'patient_appointment_list' %}">📋 我的预约</a>
+                <a href="{% url 'home' %}">🏥 医生列表</a>
+                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">🚪 退出</button>
+                </form>
+            </div>
+        </div>
 
-    {% if appointments %}
-        <table>
-            <thead>
-                <tr>
-                    <th>医生</th>
-                    <th>预约时间</th>
-                    <th>状态</th>
-                    <th>诊断结果</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for appt in appointments %}
-                <tr>
-                    <td>{{ appt.doctor.user.get_full_name }} ({{ appt.doctor.specialty }})</td>
-                    <td>{{ appt.get_local_time|date:"Y-m-d H:i" }}</td>
-                    <td class="status-{{ appt.status }}">{{ appt.get_status_display }}</td>
-                    <td>{{ appt.diagnosis|default:"待诊断" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="empty">暂无预约记录，快去<a href="{% url 'doctor_list' %}">预约医生</a>吧！</div>
-    {% endif %}
+{% if upcoming_count > 0 %}
+<div style="background: #fef9c3; border-left: 6px solid #eab308; padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+    <div>
+        <span style="font-size: 1.2rem; margin-right: 8px;">⏰</span>
+        <strong>您有 {{ upcoming_count }} 个待确认预约即将在24小时内开始，请及时确认。</strong>
+    </div>
+    <a href="{% url 'patient_appointment_list' %}" style="background: #eab308; color: white; padding: 8px 16px; border-radius: 30px; text-decoration: none; font-weight: 500;">查看详情 →</a>
+</div>
+{% endif %}
+        
+                <h1 class="page-title">📋 我的预约记录</h1>
+       
+
+
+        <!-- ========== 消息提示（新增） ========== -->
+        {% if messages %}
+        <div class="messages" style="margin-bottom: 20px;">
+            {% for message in messages %}
+                <div class="{{ message.tags }}" style="background: #dcfce7; color: #166534; padding: 12px 16px; border-radius: 12px; font-weight: 500; border-left: 4px solid #22c55e;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- ========== 消息提示结束 ========== -->
+        
+        <a href="{% url 'home' %}" class="back-link">← 返回首页继续预约</a>
+        
+        <div class="card">
+            {% if appointments %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>医生</th>
+                                <th>预约时间</th>
+                                <th>状态</th>
+                                <th>诊断结果</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in appointments %}
+                            <tr class="{% if appt.id in urgent_appointment_ids %}urgent-row{% endif %}">
+                                <td>
+                                    <strong>{{ appt.doctor.user.last_name }}{{ appt.doctor.user.first_name|default:appt.doctor.user.username }}</strong><br>
+                                    <small style="color: #64748b;">{{ appt.doctor.specialty }}</small>
+                                </td>
+                                <td>{{ appt.get_local_time|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ appt.status }}">
+                                        {{ appt.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ appt.diagnosis|default:"待诊断" }}</td>
+                                <td>
+                                    {% if appt.status == 'pending' %}
+                                        <a href="{% url 'cancel_appointment' appt.id %}" 
+                                           class="btn btn-danger"
+                                           onclick="return confirm('确定要取消这个预约吗？');">
+                                            ❌ 取消
+                                        </a>
+                                    {% else %}
+                                        <span style="color: #94a3b8;">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                {% if appointments.has_other_pages %}
+                <div style="margin-top: 20px; text-align: center;">
+                    {% if appointments.has_previous %}
+                        <a href="?page={{ appointments.previous_page_number }}" class="btn btn-secondary">← 上一页</a>
+                    {% endif %}
+                    <span style="margin: 0 10px;">第 {{ appointments.number }} / {{ appointments.paginator.num_pages }} 页</span>
+                    {% if appointments.has_next %}
+                        <a href="?page={{ appointments.next_page_number }}" class="btn btn-secondary">下一页 →</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>📅 暂无预约记录</h3>
+                    <p style="color: #94a3b8; margin-bottom: 20px;">您还没有任何预约，快去预约医生吧！</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary">🏥 浏览医生</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>

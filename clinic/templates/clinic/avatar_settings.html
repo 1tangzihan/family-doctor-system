@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>头像设置 - 家庭医生系统</title>
+    <link rel="stylesheet" href="{% static 'clinic/css/base.css' %}">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .avatar-preview {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .avatar-preview img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .avatar-preview .placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            border: 3px dashed #cbd5e1;
+            color: #94a3b8;
+            font-size: 48px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52,152,219,0.15);
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background: linear-gradient(145deg, #3498db, #4aa3df);
+            color: white;
+            box-shadow: 0 6px 14px rgba(52,152,219,0.25);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(145deg, #2980b9, #3498db);
+            transform: scale(1.02);
+            box-shadow: 0 8px 18px rgba(52,152,219,0.35);
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            margin-right: 12px;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .instructions {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        .instructions h4 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+        .instructions ul {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 6px;
+            color: #475569;
+        }
+        .messages {
+            margin-bottom: 24px;
+        }
+        .messages .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ========== 导航栏 ========== -->
+        <div class="navbar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span>👤 欢迎，<strong>{{ user.last_name }}{{ user.first_name|default:user.username }}</strong>！</span>
+                <a href="{% url 'home' %}">🏥 医生列表</a>
+                <a href="{% url 'avatar_settings' %}">🖼️ 头像设置</a>
+                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">🚪 退出</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h1 class="page-title">🖼️ 头像设置</h1>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="instructions">
+                <h4>头像设置说明：</h4>
+                <ul>
+                    <li>支持 JPG、PNG 格式的图片</li>
+                    <li>建议尺寸：200×200 像素</li>
+                    <li>文件大小不超过 2MB</li>
+                    <li>请输入完整的图片 URL 地址</li>
+                </ul>
+            </div>
+            
+            <div class="avatar-preview">
+                {% if current_avatar %}
+                    <img src="{{ current_avatar }}" alt="当前头像" id="avatar-preview">
+                {% else %}
+                    <div class="placeholder" id="avatar-placeholder">
+                        {{ user.last_name|first }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="avatar_url">头像 URL：</label>
+                    <input type="url" id="avatar_url" name="avatar_url" value="{{ current_avatar }}" placeholder="请输入头像图片的完整 URL" required>
+                </div>
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">✅ 保存设置</button>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">取消</a>
+                </div>
+            </form>
+            
+            <a href="{% url 'home' %}" class="back-link">← 返回首页</a>
+        </div>
+    </div>
+    
+    <script>
+        // 实时预览头像
+        document.getElementById('avatar_url').addEventListener('input', function(e) {
+            const url = e.target.value;
+            const preview = document.getElementById('avatar-preview');
+            const placeholder = document.getElementById('avatar-placeholder');
+            
+            if (url) {
+                if (preview) {
+                    preview.src = url;
+                    preview.style.display = 'block';
+                } else {
+                    const newPreview = document.createElement('img');
+                    newPreview.id = 'avatar-preview';
+                    newPreview.src = url;
+                    newPreview.alt = '预览头像';
+                    newPreview.style.width = '150px';
+                    newPreview.style.height = '150px';
+                    newPreview.style.borderRadius = '50%';
+                    newPreview.style.objectFit = 'cover';
+                    newPreview.style.border = '3px solid #e2e8f0';
+                    newPreview.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    
+                    const container = document.querySelector('.avatar-preview');
+                    container.innerHTML = '';
+                    container.appendChild(newPreview);
+                }
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+            } else {
+                if (preview) {
+                    preview.style.display = 'none';
+                }
+                if (placeholder) {
+                    placeholder.style.display = 'flex';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
